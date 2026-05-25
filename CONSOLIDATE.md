@@ -2946,6 +2946,15 @@ export default defineConfig([
         "yallist": "^3.0.2"
       }
     },
+    "node_modules/lucide-react": {
+      "version": "1.16.0",
+      "resolved": "https://registry.npmjs.org/lucide-react/-/lucide-react-1.16.0.tgz",
+      "integrity": "sha512-dYwyPzb4MEKpGUmNYk3WKWPnMrHs3FKM+q94kAnJrcDIqqn1hq2xY8scaS2ovsOCM5D51ey2gaRG3PBb1vgoYQ==",
+      "license": "ISC",
+      "peerDependencies": {
+        "react": "^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0"
+      }
+    },
     "node_modules/magic-string": {
       "version": "0.30.21",
       "resolved": "https://registry.npmjs.org/magic-string/-/magic-string-0.30.21.tgz",
@@ -3734,6 +3743,7 @@ export default defineConfig([
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
+    "lucide-react": "^1.16.0",
     "motion": "^12.40.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -3772,31 +3782,43 @@ export default function Footer() {
 ## src/components/Header.jsx
 
 ```
+import { useState } from 'react';
 import { Link } from 'react-router';
+import { Menu, X, Moon, Sun } from 'lucide-react';
+// eslint-disable-next-line
+import { motion, AnimatePresence } from 'motion/react';
 import { useTheme } from '../context/ThemeContext';
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const navLinks = [
+    { name: 'The Fleet', path: '/fleet' },
+    { name: 'Architecture', path: '/engineering' },
+  ];
 
   return (
-    <header className='bg-bg/70 border-border/40 sticky top-0 z-50 flex items-center justify-between border-b px-8 py-4 backdrop-blur-md transition-colors duration-300'>
-      <Link to='/' className='text-main text-xl font-bold tracking-widest'>
+    <header className='bg-bg/70 border-border/40 sticky top-0 z-50 flex items-center justify-between border-b px-6 py-4 backdrop-blur-md transition-colors duration-300 md:px-8'>
+      <Link
+        to='/'
+        className='text-main text-xl font-bold tracking-widest'
+        onClick={() => setIsOpen(false)}
+      >
         AERO<span className='text-accent'>SPACE</span>
       </Link>
 
-      <nav className='flex items-center gap-8'>
-        <Link
-          to='/fleet'
-          className='hover:text-accent text-sm font-medium transition-colors'
-        >
-          The Fleet
-        </Link>
-        <Link
-          to='/engineering'
-          className='hover:text-accent text-sm font-medium transition-colors'
-        >
-          Architecture
-        </Link>
+      {/* Desktop Navigation */}
+      <nav className='hidden items-center gap-8 md:flex'>
+        {navLinks.map(link => (
+          <Link
+            key={link.path}
+            to={link.path}
+            className='hover:text-accent text-sm font-medium transition-colors'
+          >
+            {link.name}
+          </Link>
+        ))}
         <Link
           to='/reserve'
           className='bg-text-main text-bg rounded-full px-4 py-2 text-sm font-medium transition-all hover:opacity-90'
@@ -3809,9 +3831,58 @@ export default function Header() {
           className='border-border hover:bg-surface cursor-pointer rounded-full border p-2 transition-colors'
           aria-label='Toggle Layout Theme'
         >
-          {theme === 'light' ? '🌙' : '☀️'}
+          {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
         </button>
       </nav>
+
+      {/* Mobile Toggle Buttons */}
+      <div className='flex items-center gap-4 md:hidden'>
+        <button
+          onClick={toggleTheme}
+          className='border-border rounded-full border p-2 transition-colors'
+          aria-label='Toggle Theme'
+        >
+          {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+        </button>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className='text-main focus:outline-none'
+          aria-label='Toggle Menu'
+        >
+          {isOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      {/* Mobile Drawer Overlay */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            className='border-border/40 absolute top-full left-0 z-40 flex w-full flex-col gap-6 border-b bg-black/60 px-8 py-8 shadow-2xl backdrop-blur-xl md:hidden'
+          >
+            {navLinks.map(link => (
+              <Link
+                key={link.path}
+                to={link.path}
+                onClick={() => setIsOpen(false)}
+                className='hover:text-accent text-lg font-medium tracking-wide text-white transition-colors'
+              >
+                {link.name}
+              </Link>
+            ))}
+            <Link
+              to='/reserve'
+              onClick={() => setIsOpen(false)}
+              className='bg-accent text-bg rounded-full py-3 text-center text-sm font-semibold text-white shadow-md transition-all hover:opacity-90'
+            >
+              Book Berth
+            </Link>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
@@ -3856,7 +3927,22 @@ export const useTheme = () => useContext(ThemeContext);
 ## src/layouts/AnimationLayout.jsx
 
 ```
+// eslint-disable-next-line
+import { motion } from 'motion/react';
 
+export default function AnimationLayout({ children }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -15 }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      className='flex w-full grow flex-col'
+    >
+      {children}
+    </motion.div>
+  );
+}
 ```
 
 ## src/layouts/RootLayout.jsx
@@ -3866,6 +3952,7 @@ import { Outlet, useLocation } from 'react-router';
 
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import AnimationLayout from './AnimationLayout';
 
 export default function RootLayout() {
   const location = useLocation();
@@ -3875,7 +3962,9 @@ export default function RootLayout() {
       <Header />
 
       <main className='relative flex w-full grow flex-col'>
-        <Outlet key={location.pathname} />
+        <AnimationLayout key={location.pathname}>
+          <Outlet />
+        </AnimationLayout>
       </main>
 
       <Footer />
@@ -3924,32 +4013,1193 @@ createRoot(document.getElementById('root')).render(
 ## src/pages/Engineering.jsx
 
 ```
+// eslint-disable-next-line
+import { motion } from 'motion/react';
+import {
+  Layers,
+  Thermometer,
+  ShieldCheck,
+  Wind,
+  Droplets,
+  Sun,
+} from 'lucide-react';
+
+const 
+fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: '-50px' },
+};
+
 export default function Engineering() {
-  return <div></div>;
+  return (
+    <div className='w-full space-y-24 overflow-x-hidden pb-24'>
+      <EngineeringHeroSection />
+      <HullSystemSection />
+      <LifeSupportEcosystemSection />
+    </div>
+  );
+}
+
+// ==========================================
+// 1. ENGINEERING HERO SECTION
+// ==========================================
+function EngineeringHeroSection() {
+  return (
+    <section className='bg-surface/10 border-border/20 relative border-b px-6 py-20 text-center md:px-8 lg:py-28'>
+      <div className='absolute inset-0 -z-10 bg-[radial-gradient(circle_at_bottom,var(--color-accent)_0%,transparent_60%)] opacity-5' />
+
+      <div className='mx-auto max-w-3xl space-y-4'>
+        <motion.span
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className='text-accent text-xs font-bold tracking-[0.25em] uppercase'
+        >
+          Structural Integrity Systems
+        </motion.span>
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className='text-main text-3xl font-black tracking-tight sm:text-4xl md:text-5xl lg:text-6xl'
+        >
+          AeroSpace Structural Physics
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className='text-muted mx-auto max-w-2xl text-sm leading-relaxed sm:text-base md:text-lg'
+        >
+          A detailed breakdown of the thermal insulation matrix, structural
+          hulls, and life support systems sustaining human operations under
+          high-altitude conditions.
+        </motion.p>
+      </div>
+    </section>
+  );
+}
+
+// ==========================================
+// 2. THE HULL SYSTEM SECTION (Sticky Side-By-Side Split)
+// ==========================================
+function HullSystemSection() {
+  const layerTech = [
+    {
+      title: 'Carbon-Matrix Composite Shielding',
+      desc: 'An ultra-dense interwoven outer layout shell designed to distribute structural loads evenly across high-velocity escape pathways.',
+      icon: <Layers size={20} className='text-accent' />,
+    },
+    {
+      title: 'Aero-Gel Thermal Interlayer',
+      desc: 'Advanced synthetic multi-layer matrix providing insulation against extreme thermal gradients ranging from -150°C up to 1200°C.',
+      icon: <Thermometer size={20} className='text-accent' />,
+    },
+    {
+      title: 'Sovereign Micrometeorite Armor',
+      desc: 'Self-healing kinetic absorption layers engineered to instantly neutralize high-velocity space debris impacts up to 8mm.',
+      icon: <ShieldCheck size={20} className='text-accent' />,
+    },
+  ];
+
+  return (
+    <section className='mx-auto max-w-7xl px-6 md:px-8'>
+      <div className='grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-start'>
+        {/* Left Column: Sticky Title & Concept Context */}
+        <div className='space-y-4 lg:sticky lg:top-28 lg:pr-8'>
+          <span className='text-accent text-xs font-bold tracking-widest uppercase'>
+            Thermal Protection
+          </span>
+          <h2 className='text-main text-3xl font-bold tracking-tight sm:text-4xl'>
+            The Reinforcement Matrix
+          </h2>
+          <p className='text-muted text-sm leading-relaxed sm:text-base'>
+            Our hull engineering leverages structural physics principles to
+            construct modular shells that guarantee safety during extreme
+            atmospheric friction.
+          </p>
+          <div className='bg-surface border-border/40 mt-8 hidden rounded-2xl border p-6 shadow-sm lg:block'>
+            <div className='text-accent mb-2 font-mono text-xs'>
+              // TELEMETRY RECOGNITION STATUS
+            </div>
+            <div className='text-main text-sm font-semibold'>
+              Structure Validation: 100% Certified
+            </div>
+            <div className='text-muted mt-1 text-xs'>
+              Outer multi-layer systems undergo structural testing profiles
+              prior to route deployments.
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Scrolling Tech Breakdowns */}
+        <div className='space-y-6'>
+          {layerTech.map((tech, index) => (
+            <motion.div
+              key={index}
+              {...fadeInUp}
+              transition={{ duration: 0.5, delay: index * 0.05 }}
+              className='border-border/40 bg-surface/40 hover:border-accent/30 flex items-start gap-4 rounded-2xl border p-6 shadow-sm backdrop-blur-sm transition-colors'
+            >
+              <div className='bg-accent/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl'>
+                {tech.icon}
+              </div>
+              <div className='space-y-1.5'>
+                <h3 className='text-main text-base font-bold tracking-tight sm:text-lg'>
+                  {tech.title}
+                </h3>
+                <p className='text-muted text-xs leading-relaxed sm:text-sm'>
+                  {tech.desc}
+                </p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ==========================================
+// 3. THE LIFE SUPPORT ECOSYSTEM (Premium Grid)
+// ==========================================
+function LifeSupportEcosystemSection() {
+  const ecosystemNodes = [
+    {
+      title: 'Atmospheric Controls',
+      desc: 'Closed-loop oxygen delivery and carbon scrubbers maintaining pressure parameters identical to sea-level metrics.',
+      icon: <Wind className='text-accent' />,
+    },
+    {
+      title: 'Hydration Recovery',
+      desc: '98% automated fluid collection and purification circuits ensuring long-term systemic self-reliance.',
+      icon: <Droplets className='text-accent' />,
+    },
+    {
+      title: 'Solar Energy Management',
+      desc: 'High-density photovoltaic layers integrated across hull matrices to store clean power within modular battery systems.',
+      icon: <Sun className='text-accent' />,
+    },
+  ];
+
+  return (
+    <section className='mx-auto max-w-7xl space-y-12 px-6 md:px-8'>
+      <div className='mx-auto max-w-2xl space-y-2 text-center'>
+        <h2 className='text-main text-3xl font-bold tracking-tight sm:text-4xl'>
+          Life Support Ecosystem
+        </h2>
+        <p className='text-muted text-sm sm:text-base'>
+          Self-reliant closed-loop configurations engineered to sustain life
+          across deep sub-routes.
+        </p>
+      </div>
+
+      <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
+        {ecosystemNodes.map((node, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, scale: 0.96 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, margin: '-50px' }}
+            transition={{ duration: 0.5, delay: i * 0.1 }}
+            className='border-border/40 bg-surface/50 rounded-2xl border p-6 text-center shadow-sm transition-shadow hover:shadow-md'
+          >
+            <div className='bg-accent/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl'>
+              {node.icon}
+            </div>
+            <h3 className='text-main mb-2 text-lg font-bold tracking-tight'>
+              {node.title}
+            </h3>
+            <p className='text-muted text-xs leading-relaxed sm:text-sm'>
+              {node.desc}
+            </p>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+  );
 }
 ```
 
 ## src/pages/Fleet.jsx
 
 ```
+import { useState } from 'react';
+// eslint-disable-next-line
+import { motion, AnimatePresence } from 'motion/react';
+import { ArrowUpRight, Gauge, Users, Orbit } from 'lucide-react';
+import { Link } from 'react-router';
+
+// ==========================================
+// DATA ARCHITECTURE (Real-World Fidelity)
+// ==========================================
+const FLEET_DATA = [
+  {
+    id: 'vessel-stratocruiser',
+    name: 'Aero-V Stratocruiser',
+    category: 'suborbital',
+    capacity: '12 Passengers',
+    speed: 'Mach 6.2',
+    altitude: '105 km (Kármán Line)',
+    desc: 'Engineered for high-altitude luxury excursions and microgravity dining events. Features a full 360-degree panoramic viewing dome constructed from reinforced hybrid-sapphire glass.',
+    tier: 'Executive Lounge',
+  },
+  {
+    id: 'vessel-orion',
+    name: 'Aero-X Orion Heavy',
+    category: 'orbital',
+    capacity: '8 Crew + Logistics',
+    speed: '27,600 km/h',
+    altitude: '420 km Low Earth Orbit',
+    desc: 'The backbone of orbital infrastructure logistics. Designed for deep-payload transport, space station modular integration, and rapid automated docking maneuvers.',
+    tier: 'Industrial Cargo',
+  },
+  {
+    id: 'vessel-elysium',
+    name: 'Stratum Elysium-9',
+    category: 'habitat',
+    capacity: '24 Permanent Residents',
+    speed: 'Synchronous Stationary',
+    altitude: '35,786 km Geostationary',
+    desc: 'A premium, high-comfort orbital habitat module. Equipped with full closed-loop atmospheric synthesis, artificial gravity rings, and radiation shielding layers.',
+    tier: 'Sovereign Suite',
+  },
+  {
+    id: 'vessel-solaris',
+    name: 'Aero-Y Solaris Clipper',
+    category: 'suborbital',
+    capacity: '6 Passengers',
+    speed: 'Mach 8.4',
+    altitude: '120 km Upper Ionosphere',
+    desc: 'Hyper-sonic point-to-point intercontinental transit vessel. Drastically compresses global cross-hemisphere travel times into safe, hour-long orbital sub-routes.',
+    tier: 'First Class Premium',
+  },
+  {
+    id: 'vessel-chronos',
+    name: 'Chronos Deep Explorer',
+    category: 'orbital',
+    capacity: '16 Passengers',
+    speed: '11.2 km/s (Escape Velocity)',
+    altitude: 'Translunar Trajectory',
+    desc: 'Optimized for high-velocity transfers between Earth orbits and lunar staging outposts. Built with next-generation magneto-plasma propulsion systems.',
+    tier: 'Voyager Deck',
+  },
+];
+
+const CATEGORIES = [
+  { id: 'all', label: 'All Vessels' },
+  { id: 'suborbital', label: 'Suborbital Catalysts' },
+  { id: 'orbital', label: 'Heavy Orbital Transports' },
+  { id: 'habitat', label: 'Deep Space Habitats' },
+];
+
 export default function Fleet() {
-  return <div></div>;
+  const [activeCategory, setActiveCategory] = useState('all');
+
+  const filteredFleet = FLEET_DATA.filter(
+    vessel => activeCategory === 'all' || vessel.category === activeCategory,
+  );
+
+  return (
+    <div className='w-full space-y-12 overflow-x-hidden pb-24'>
+      <FleetHeroSection />
+
+      {/* Container to link filter action and grid items together cleanly */}
+      <div className='mx-auto max-w-7xl space-y-8 px-6 md:px-8'>
+        <FleetFilterSection
+          activeCategory={activeCategory}
+          setActiveCategory={setActiveCategory}
+        />
+        <FleetGridSection filteredFleet={filteredFleet} />
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// 1. FLEET HERO SECTION
+// ==========================================
+function FleetHeroSection() {
+  return (
+    <section className='bg-surface/20 border-border/20 relative border-b px-6 py-20 text-center md:px-8 lg:py-28'>
+      <div className='absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,var(--color-accent)_0%,transparent_65%)] opacity-5' />
+
+      <div className='mx-auto max-w-3xl space-y-4'>
+        <motion.span
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className='text-accent text-xs font-bold tracking-[0.25em] uppercase'
+        >
+          Orbital Fleet Registry
+        </motion.span>
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className='text-main text-3xl font-black tracking-tight sm:text-4xl md:text-5xl lg:text-6xl'
+        >
+          The Architectural Vanguard
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className='text-muted mx-auto max-w-2xl text-sm leading-relaxed sm:text-base md:text-lg'
+        >
+          Browse our active roster of fully reusable transport modules, orbital
+          habitats, and hypersonic suborbital vessels built to expand commercial
+          operations.
+        </motion.p>
+      </div>
+    </section>
+  );
+}
+
+// ==========================================
+// 2. CATEGORICAL FILTER CONTROL SECTION
+// ==========================================
+function FleetFilterSection({ activeCategory, setActiveCategory }) {
+  return (
+    <section className='border-border/30 flex flex-wrap items-center justify-start gap-2 border-b pb-4 sm:justify-center'>
+      {CATEGORIES.map(category => {
+        const isActive = activeCategory === category.id;
+        return (
+          <button
+            key={category.id}
+            onClick={() => setActiveCategory(category.id)}
+            className={`relative cursor-pointer rounded-full px-5 py-2.5 text-xs font-medium transition-colors select-none focus:outline-none sm:text-sm ${
+              isActive ? 'text-bg font-semibold' : 'text-muted hover:text-main'
+            }`}
+          >
+            {/* Smooth glowing capsule sliding behind active tab */}
+            {isActive && (
+              <motion.div
+                layoutId='activeFilterCapsule'
+                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                className='bg-text-main absolute inset-0 -z-10 rounded-full shadow-sm'
+              />
+            )}
+            {category.label}
+          </button>
+        );
+      })}
+    </section>
+  );
+}
+
+// ==========================================
+// 3. FLEET GRID LISTING SECTION
+// ==========================================
+function FleetGridSection({ filteredFleet }) {
+  return (
+    <section className='w-full'>
+      {/* AnimatePresence handles element layout swaps fluidly when list updates */}
+      <motion.div
+        layout
+        className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3'
+      >
+        <AnimatePresence mode='popLayout'>
+          {filteredFleet.map(vessel => (
+            <motion.div
+              layout
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.92 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              key={vessel.id}
+              className='border-border/40 bg-surface/40 group hover:border-accent/40 flex flex-col justify-between rounded-2xl border p-6 shadow-sm backdrop-blur-sm transition-colors'
+            >
+              <div className='space-y-4'>
+                <div className='flex items-start justify-between gap-4'>
+                  <div>
+                    <span className='text-accent bg-accent/5 border-accent/10 rounded-md border px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase'>
+                      {vessel.tier}
+                    </span>
+                    <h2 className='text-main group-hover:text-accent mt-1 text-xl font-bold tracking-tight transition-colors'>
+                      {vessel.name}
+                    </h2>
+                  </div>
+                  <div className='border-border/40 bg-surface text-muted group-hover:text-accent flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border shadow-sm transition-colors'>
+                    <ArrowUpRight size={18} />
+                  </div>
+                </div>
+
+                <p className='text-muted text-xs leading-relaxed font-normal sm:text-sm'>
+                  {vessel.desc}
+                </p>
+
+                {/* Performance Engineering Specs Grid */}
+                <div className='border-border/20 bg-surface/30 space-y-3 rounded-xl border p-4 text-xs'>
+                  <div className='text-muted flex items-center justify-between'>
+                    <span className='flex items-center gap-1.5'>
+                      <Users size={14} /> Capacity
+                    </span>
+                    <span className='text-main font-medium'>
+                      {vessel.capacity}
+                    </span>
+                  </div>
+                  <div className='text-muted flex items-center justify-between'>
+                    <span className='flex items-center gap-1.5'>
+                      <Gauge size={14} /> Peak Velocity
+                    </span>
+                    <span className='text-main font-medium'>
+                      {vessel.speed}
+                    </span>
+                  </div>
+                  <div className='text-muted flex items-center justify-between'>
+                    <span className='flex items-center gap-1.5'>
+                      <Orbit size={14} /> Operating Ceiling
+                    </span>
+                    <span className='text-main font-medium'>
+                      {vessel.altitude}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className='pt-6'>
+                <Link
+                  to='/reserve'
+                  className='border-border bg-surface/70 text-main hover:bg-text-main hover:text-bg flex w-full items-center justify-center rounded-full border py-3 text-xs font-medium shadow-sm transition-colors sm:text-sm'
+                >
+                  Configure Configuration Matrix
+                </Link>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
+    </section>
+  );
 }
 ```
 
 ## src/pages/Home.jsx
 
 ```
+import { ArrowRight, Shield, Zap, Globe } from 'lucide-react';
+// eslint-disable-next-line
+import { motion } from 'motion/react';
+import { Link } from 'react-router';
+
+// Global framer variants to prevent redundancy and keep files clean
+const fadeInUp = {
+  initial: { opacity: 0, y: 30 },
+  animate: { opacity: 1, y: 0 },
+};
+
+const staggerContainer = {
+  animate: { transition: { staggerChildren: 0.1 } },
+};
+
 export default function Home() {
-  return <div></div>;
+  return (
+    <div className='w-full space-y-24 overflow-x-hidden pb-24'>
+      <HeroSection />
+      <MissionSection />
+      <MetricsSection />
+      <ExperiencesPreviewSection />
+    </div>
+  );
+}
+
+// ==========================================
+// 1. HERO SECTION
+// ===========================================
+function HeroSection() {
+  return (
+    <section className='relative flex min-h-[85vh] w-full flex-col items-center justify-center px-6 text-center md:px-8'>
+      {/* Absolute space background visual asset */}
+      <div className='absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,var(--color-surface)_0%,transparent_75%)] opacity-70' />
+
+      <motion.div
+        variants={staggerContainer}
+        initial='initial'
+        animate='animate'
+        className='max-w-4xl space-y-6'
+      >
+        <motion.span
+          variants={fadeInUp}
+          transition={{ duration: 0.6 }}
+          className='text-accent text-xs font-bold tracking-[0.3em] uppercase md:text-sm'
+        >
+          Orbital Civilian Transit Systems
+        </motion.span>
+
+        <motion.h1
+          variants={fadeInUp}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className='text-main text-4xl font-extrabold tracking-tight sm:text-5xl md:text-7xl lg:text-8xl'
+        >
+          Beyond the Horizon.
+          <br className='hidden sm:inline' /> Within Reach.
+        </motion.h1>
+
+        <motion.p
+          variants={fadeInUp}
+          transition={{ duration: 0.8 }}
+          className='text-muted mx-auto max-w-2xl text-base leading-relaxed font-normal sm:text-lg md:text-xl'
+        >
+          AeroSpace delivers unprecedented autonomous logistics architecture and
+          premium high-altitude orbital pathways designed for visionaries
+          expanding beyond low Earth boundaries.
+        </motion.p>
+
+        <motion.div
+          variants={fadeInUp}
+          transition={{ duration: 0.6 }}
+          className='flex flex-col items-center justify-center gap-4 pt-6 sm:flex-row'
+        >
+          <Link
+            to='/fleet'
+            className='bg-text-main text-bg flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-sm font-medium shadow-lg transition-transform hover:-translate-y-0.5 sm:w-auto'
+          >
+            Explore the Fleet <ArrowRight size={16} />
+          </Link>
+          <Link
+            to='/engineering'
+            className='border-border bg-surface/50 hover:bg-surface text-main flex w-full items-center justify-center rounded-full border px-8 py-4 text-sm font-medium backdrop-blur-sm transition-colors sm:w-auto'
+          >
+            Structural Engineering
+          </Link>
+        </motion.div>
+      </motion.div>
+    </section>
+  );
+}
+
+// ==========================================
+// 2. MISSION STATEMENT
+// ==========================================
+function MissionSection() {
+  const statementWords =
+    'We believe that space is not a destination to visit, but a completely new dimension for sustainable infrastructure, human discovery, and luxury travel operations.'.split(
+      ' ',
+    );
+
+  return (
+    <section className='mx-auto max-w-5xl px-6 py-12 md:px-8'>
+      <div className='border-border/40 bg-surface/30 rounded-3xl border p-8 backdrop-blur-sm sm:p-12 md:p-16'>
+        <p className='text-accent mb-6 text-xs font-bold tracking-widest uppercase'>
+          Operational Outlook
+        </p>
+        <motion.h2
+          initial='initial'
+          whileInView='animate'
+          viewport={{ once: true, margin: '-100px' }}
+          variants={staggerContainer}
+          className='text-main text-2xl leading-relaxed font-medium tracking-tight sm:text-3xl md:text-4xl'
+        >
+          {statementWords.map((word, index) => (
+            <motion.span
+              key={index}
+              variants={{
+                initial: { opacity: 0.2, y: 5 },
+                animate: { opacity: 1, y: 0 },
+              }}
+              transition={{ duration: 0.4 }}
+              className='mr-2 inline-block'
+            >
+              {word}
+            </motion.span>
+          ))}
+        </motion.h2>
+      </div>
+    </section>
+  );
+}
+
+// ==========================================
+// 3. METRICS GRID (BENTO BOX)
+// ==========================================
+function MetricsSection() {
+  const metrics = [
+    {
+      value: '0',
+      unit: 'Incident Record',
+      label:
+        'Uncompromised architectural integrity validated across orbital vectors.',
+      icon: <Shield className='text-accent' size={24} />,
+    },
+    {
+      value: '2.4x',
+      unit: 'Escape Velocity',
+      label:
+        'Propulsion acceleration matrices optimized for time-critical escape pathways.',
+      icon: <Zap className='text-accent' size={24} />,
+    },
+    {
+      value: '100%',
+      unit: 'Reusable Fleet',
+      label:
+        'Sustainable vertical structural designs mitigating atmospheric micro-pollution.',
+      icon: <Globe className='text-accent' size={24} />,
+    },
+  ];
+
+  return (
+    <section className='mx-auto max-w-7xl space-y-8 px-6 md:px-8'>
+      <div className='max-w-xl space-y-2'>
+        <h2 className='text-main text-3xl font-bold tracking-tight sm:text-4xl'>
+          Validated In Transit
+        </h2>
+        <p className='text-muted text-sm sm:text-base'>
+          Empirical flight performance analytics sustaining high-frequency
+          execution schedules.
+        </p>
+      </div>
+
+      <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
+        {metrics.map((metric, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-50px' }}
+            transition={{ duration: 0.5, delay: i * 0.1 }}
+            className='border-border/40 bg-surface/50 flex flex-col justify-between rounded-2xl border p-6 shadow-sm transition-all hover:shadow-md'
+          >
+            <div className='bg-accent/10 mb-8 flex h-12 w-12 items-center justify-center rounded-xl'>
+              {metric.icon}
+            </div>
+            <div className='space-y-2'>
+              <div className='flex items-baseline gap-2'>
+                <span className='text-main text-4xl font-black tracking-tight sm:text-5xl'>
+                  {metric.value}
+                </span>
+                <span className='text-accent text-sm font-bold tracking-wide uppercase'>
+                  {metric.unit}
+                </span>
+              </div>
+              <p className='text-muted text-xs leading-relaxed sm:text-sm'>
+                {metric.label}
+              </p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ==========================================
+// 4. CORE EXPERIENCES PREVIEW
+// ==========================================
+function ExperiencesPreviewSection() {
+  const experiences = [
+    {
+      title: 'Low Earth Orbit',
+      desc: 'Sustain microgravity modules overlooking blue geometric horizons at 400km altitude gradients.',
+      image: '🌐',
+    },
+    {
+      title: 'Lunar Lagrange Point',
+      desc: 'Position beyond deep lunar shadows within state-of-the-art permanent modular safe harbors.',
+      image: '🌗',
+    },
+    {
+      title: 'Orbital Stations',
+      desc: 'Interlinked modular deep-space hubs offering full atmospheric synthesis adjustments.',
+      image: '🛰️',
+    },
+  ];
+
+  return (
+    <section className='mx-auto max-w-7xl space-y-8 px-6 md:px-8'>
+      <div className='flex flex-col justify-between gap-4 sm:flex-row sm:items-end'>
+        <div className='space-y-2'>
+          <h2 className='text-main text-3xl font-bold tracking-tight sm:text-4xl'>
+            Curated Pathways
+          </h2>
+          <p className='text-muted text-sm sm:text-base'>
+            Select destination vectors mapped across sovereign luxury
+            infrastructures.
+          </p>
+        </div>
+        <Link
+          to='/reserve'
+          className='text-accent group flex items-center gap-1 text-sm font-bold hover:underline'
+        >
+          Configure Reservation Parameters{' '}
+          <ArrowRight
+            size={16}
+            className='transition-transform group-hover:translate-x-1'
+          />
+        </Link>
+      </div>
+
+      <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3'>
+        {experiences.map((exp, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, margin: '-50px' }}
+            transition={{ duration: 0.5, delay: i * 0.1 }}
+            className='border-border/40 bg-surface group relative overflow-hidden rounded-2xl border p-6 shadow-sm transition-transform hover:-translate-y-1'
+          >
+            <div className='mb-4 inline-block text-4xl duration-300 select-none group-hover:scale-110'>
+              {exp.image}
+            </div>
+            <h3 className='text-main mb-2 text-xl font-bold tracking-tight'>
+              {exp.title}
+            </h3>
+            <p className='text-muted text-xs leading-relaxed sm:text-sm'>
+              {exp.desc}
+            </p>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+  );
 }
 ```
 
 ## src/pages/Reserve.jsx
 
 ```
+import { useState } from 'react';
+// eslint-disable-next-line
+import { motion, AnimatePresence } from 'motion/react';
+import {
+  ArrowRight,
+  ArrowLeft,
+  CheckCircle2,
+  Rocket,
+  ShieldCheck,
+  User,
+} from 'lucide-react';
+
+const formVariants = {
+  initial: { opacity: 0, x: 20 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -20 },
+};
+
 export default function Reserve() {
-  return <div></div>;
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({
+    destination: '',
+    tier: '',
+    fullName: '',
+    email: '',
+    passportId: '',
+  });
+
+  const nextStep = () => setStep(prev => Math.min(prev + 1, 4));
+  const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
+
+  const handleSelect = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleInputChange = e => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  return (
+    <div className='mx-auto flex w-full max-w-3xl grow flex-col justify-center overflow-x-hidden px-6 py-12 md:px-8'>
+      <div className='border-border/40 bg-surface/30 w-full rounded-3xl border p-6 shadow-xl backdrop-blur-sm sm:p-10'>
+        <StepIndicator currentStep={step} />
+
+        <div className='mt-8 flex min-h-95 flex-col justify-between'>
+          <AnimatePresence mode='wait'>
+            {step === 1 && (
+              <DestinationSelection
+                key='step1'
+                selected={formData.destination}
+                onSelect={val => handleSelect('destination', val)}
+                onNext={nextStep}
+              />
+            )}
+
+            {step === 2 && (
+              <VesselTierSelection
+                key='step2'
+                selected={formData.tier}
+                onSelect={val => handleSelect('tier', val)}
+                onNext={nextStep}
+                onPrev={prevStep}
+              />
+            )}
+
+            {step === 3 && (
+              <PassengerCredentials
+                key='step3'
+                formData={formData}
+                onChange={handleInputChange}
+                onNext={nextStep}
+                onPrev={prevStep}
+              />
+            )}
+
+            {step === 4 && <SuccessScreen key='step4' formData={formData} />}
+          </AnimatePresence>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// 1. PROGRESSIVE STEP INDICATOR
+// ==========================================
+function StepIndicator({ currentStep }) {
+  const steps = ['Destination', 'Tier Matrix', 'Credentials', 'Confirmation'];
+
+  return (
+    <div className='border-border/20 w-full border-b pb-6'>
+      <div className='flex items-center justify-between'>
+        {steps.map((label, index) => {
+          const stepNumber = index + 1;
+          const isActive = currentStep >= stepNumber;
+          return (
+            <div
+              key={index}
+              className='relative flex flex-1 flex-col items-center'
+            >
+              <div
+                className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
+                  isActive
+                    ? 'bg-accent text-bg shadow-sm'
+                    : 'bg-surface border-border text-muted border'
+                }`}
+              >
+                {currentStep > stepNumber ? '✓' : stepNumber}
+              </div>
+              <span
+                className={`mt-2 hidden text-[11px] font-medium tracking-wide uppercase transition-colors sm:block ${
+                  isActive ? 'text-main font-semibold' : 'text-muted'
+                }`}
+              >
+                {label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// 2. STEP 1: DESTINATION SELECTION
+// ==========================================
+function DestinationSelection({ selected, onSelect, onNext }) {
+  const options = [
+    {
+      id: 'leo',
+      title: 'Low Earth Orbit',
+      price: '$250,000',
+      detail: '400km Altitude Gradients',
+    },
+    {
+      id: 'lunar',
+      title: 'Lunar Lagrange Point',
+      price: '$1,200,000',
+      detail: 'Translunar Module Habitat',
+    },
+    {
+      id: 'station',
+      title: 'Orbital Station Hubs',
+      price: '$450,000',
+      detail: 'Atmospheric Micro-Modules',
+    },
+  ];
+
+  return (
+    <motion.div
+      variants={formVariants}
+      initial='initial'
+      animate='animate'
+      exit='exit'
+      className='flex grow flex-col justify-between space-y-6'
+    >
+      <div className='space-y-4'>
+        <div>
+          <h2 className='text-main text-xl font-bold tracking-tight sm:text-2xl'>
+            Select Flight Horizon
+          </h2>
+          <p className='text-muted text-sm'>
+            Select your destination vector trajectory from our active orbital
+            routes.
+          </p>
+        </div>
+
+        <div className='grid grid-cols-1 gap-4'>
+          {options.map(opt => (
+            <button
+              key={opt.id}
+              onClick={() => onSelect(opt.id)}
+              className={`flex cursor-pointer flex-col items-start justify-between gap-4 rounded-2xl border p-5 text-left transition-all select-none sm:flex-row sm:items-center ${
+                selected === opt.id
+                  ? 'border-accent bg-accent/5 ring-accent ring-1'
+                  : 'border-border/60 bg-surface/40 hover:bg-surface'
+              }`}
+            >
+              <div>
+                <h3 className='text-main text-base font-bold tracking-tight'>
+                  {opt.title}
+                </h3>
+                <p className='text-muted text-xs'>{opt.detail}</p>
+              </div>
+              <span className='text-accent font-mono text-sm font-bold'>
+                {opt.price}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className='flex justify-end pt-6'>
+        <button
+          onClick={onNext}
+          disabled={!selected}
+          className='bg-text-main text-bg flex cursor-pointer items-center gap-2 rounded-full px-6 py-3 text-sm font-medium shadow-md transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40'
+        >
+          Continue <ArrowRight size={16} />
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
+// ==========================================
+// 3. STEP 2: VESSEL TIER SELECTION
+// ==========================================
+function VesselTierSelection({ selected, onSelect, onNext, onPrev }) {
+  const tiers = [
+    {
+      id: 'executive',
+      title: 'Executive Lounge',
+      amenities: 'Panoramic Dome Access • Microgravity Dining Allocation',
+    },
+    {
+      id: 'sovereign',
+      title: 'Sovereign Suite',
+      amenities:
+        'Private Quarter Stabilization • Artificial Gravity Allocation',
+    },
+    {
+      id: 'voyager',
+      title: 'Voyager Deck',
+      amenities: 'Integrated Logistics Pod • Shared Observational Platforms',
+    },
+  ];
+
+  return (
+    <motion.div
+      variants={formVariants}
+      initial='initial'
+      animate='animate'
+      exit='exit'
+      className='flex grow flex-col justify-between space-y-6'
+    >
+      <div className='space-y-4'>
+        <div>
+          <h2 className='text-main text-xl font-bold tracking-tight sm:text-2xl'>
+            Select Berth Allocation Matrix
+          </h2>
+          <p className='text-muted text-sm'>
+            Select your preferred suite density configuration and structural
+            layer parameters.
+          </p>
+        </div>
+
+        <div className='grid grid-cols-1 gap-4'>
+          {tiers.map(tier => (
+            <button
+              key={tier.id}
+              onClick={() => onSelect(tier.id)}
+              className={`cursor-pointer rounded-2xl border p-5 text-left transition-all select-none ${
+                selected === tier.id
+                  ? 'border-accent bg-accent/5 ring-accent ring-1'
+                  : 'border-border/60 bg-surface/40 hover:bg-surface'
+              }`}
+            >
+              <h3 className='text-main text-base font-bold tracking-tight'>
+                {tier.title}
+              </h3>
+              <p className='text-muted mt-1 text-xs leading-relaxed'>
+                {tier.amenities}
+              </p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className='flex items-center justify-between gap-4 pt-6'>
+        <button
+          onClick={onPrev}
+          className='border-border hover:bg-surface text-main flex cursor-pointer items-center gap-2 rounded-full border px-6 py-3 text-sm font-medium transition-colors'
+        >
+          <ArrowLeft size={16} /> Back
+        </button>
+        <button
+          onClick={onNext}
+          disabled={!selected}
+          className='bg-text-main text-bg flex cursor-pointer items-center gap-2 rounded-full px-6 py-3 text-sm font-medium shadow-md transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40'
+        >
+          Continue <ArrowRight size={16} />
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
+// ==========================================
+// 4. STEP 3: PASSENGER CREDENTIALS
+// ==========================================
+function PassengerCredentials({ formData, onChange, onNext, onPrev }) {
+  const isFormValid =
+    formData.fullName && formData.email && formData.passportId;
+
+  return (
+    <motion.div
+      variants={formVariants}
+      initial='initial'
+      animate='animate'
+      exit='exit'
+      className='flex grow flex-col justify-between space-y-6'
+    >
+      <div className='space-y-4'>
+        <div>
+          <h2 className='text-main text-xl font-bold tracking-tight sm:text-2xl'>
+            Passenger Manifest Registry
+          </h2>
+          <p className='text-muted text-sm'>
+            Input your legal credentials below to sync configuration
+            documentation fields.
+          </p>
+        </div>
+
+        <div className='space-y-4 text-xs sm:text-sm'>
+          <div className='space-y-1.5'>
+            <label className='text-muted font-medium' htmlFor='fullName'>
+              Full Legal Name
+            </label>
+            <input
+              type='text'
+              id='fullName'
+              name='fullName'
+              value={formData.fullName}
+              onChange={onChange}
+              placeholder='e.g., Yusuf Oyinlola'
+              className='border-border/60 bg-surface/40 text-main focus:border-accent w-full rounded-xl border px-4 py-3 transition-colors focus:outline-none'
+              required
+            />
+          </div>
+
+          <div className='space-y-1.5'>
+            <label className='text-muted font-medium' htmlFor='email'>
+              Secure Communication Routing Email
+            </label>
+            <input
+              type='email'
+              id='email'
+              name='email'
+              value={formData.email}
+              onChange={onChange}
+              placeholder='developer@yuzstack.com'
+              className='border-border/60 bg-surface/40 text-main focus:border-accent w-full rounded-xl border px-4 py-3 transition-colors focus:outline-none'
+              required
+            />
+          </div>
+
+          <div className='space-y-1.5'>
+            <label className='text-muted font-medium' htmlFor='passportId'>
+              Global Identification Reference ID
+            </label>
+            <input
+              type='text'
+              id='passportId'
+              name='passportId'
+              value={formData.passportId}
+              onChange={onChange}
+              placeholder='e.g., ORB-X942001'
+              className='border-border/60 bg-surface/40 text-main focus:border-accent w-full rounded-xl border px-4 py-3 transition-colors focus:outline-none'
+              required
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className='flex items-center justify-between gap-4 pt-6'>
+        <button
+          onClick={onPrev}
+          className='border-border hover:bg-surface text-main flex cursor-pointer items-center gap-2 rounded-full border px-6 py-3 text-sm font-medium transition-colors'
+        >
+          <ArrowLeft size={16} /> Back
+        </button>
+        <button
+          onClick={onNext}
+          disabled={!isFormValid}
+          className='bg-text-main text-bg flex cursor-pointer items-center gap-2 rounded-full px-6 py-3 text-sm font-medium shadow-md transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40'
+        >
+          Validate Allocation <Rocket size={16} />
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
+// ==========================================
+// 5. STEP 4: SUCCESS CONSOLE SCREEN
+// ==========================================
+function SuccessScreen({ formData }) {
+  return (
+    <motion.div
+      variants={{
+        initial: { opacity: 0, scale: 0.95 },
+        animate: { opacity: 1, scale: 1 },
+      }}
+      initial='initial'
+      animate='animate'
+      className='flex grow flex-col items-center justify-center space-y-6 py-4 text-center'
+    >
+      <div className='bg-accent/10 text-accent flex h-16 w-16 items-center justify-center rounded-2xl shadow-sm'>
+        <CheckCircle2 size={36} />
+      </div>
+
+      <div className='max-w-md space-y-2'>
+        <h2 className='text-main text-2xl font-black tracking-tight sm:text-3xl'>
+          Berth Allocation Secured
+        </h2>
+        <p className='text-muted text-xs leading-relaxed sm:text-sm'>
+          Congratulations,{' '}
+          <span className='text-main font-semibold'>{formData.fullName}</span>.
+          Your flight manifest credentials have been successfully updated inside
+          our real-time database registers.
+        </p>
+      </div>
+
+      <div className='border-border/40 bg-surface/40 w-full max-w-md space-y-3 rounded-2xl border p-5 text-left text-xs font-normal shadow-sm'>
+        <div className='text-accent border-border/20 flex items-center gap-1.5 border-b pb-2 font-mono text-[10px] tracking-wider uppercase'>
+          <ShieldCheck size={14} /> Allocation Security Matrix Verified
+        </div>
+        <div className='flex items-center justify-between'>
+          <span className='text-muted flex items-center gap-1'>
+            <User size={12} /> Registry ID
+          </span>
+          <span className='text-main font-mono font-semibold uppercase'>
+            {formData.passportId}
+          </span>
+        </div>
+        <div className='flex items-center justify-between'>
+          <span className='text-muted'>Destination Class</span>
+          <span className='text-main font-medium capitalize'>
+            {formData.destination} Class Vector
+          </span>
+        </div>
+        <div className='flex items-center justify-between'>
+          <span className='text-muted'>Communication Hook</span>
+          <span className='text-main font-medium'>{formData.email}</span>
+        </div>
+      </div>
+    </motion.div>
+  );
 }
 ```
 
@@ -3991,6 +5241,19 @@ export default function Reserve() {
 }
 ```
 
+## vercel.json
+
+```
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
+```
+
 ## vite.config.js
 
 ```
@@ -4003,3 +5266,4 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
 });
 ```
+
