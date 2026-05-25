@@ -1,3 +1,126 @@
+# Consolidated Codebase
+
+This file contains the full source and configuration files from the repository.
+
+## .gitignore
+
+```
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+```
+
+## .prettierrc
+
+```
+{
+  "singleQuote": true,
+  "jsxSingleQuote": true,
+  "arrowParens": "avoid",
+  "plugins": ["prettier-plugin-tailwindcss"]
+}
+```
+
+## README.md
+
+```
+# React + Tailwind +  Vite
+
+This template provides a minimal setup to get React and Tailwind working in Vite with HMR and some ESLint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+## React Compiler
+
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```
+
+## eslint.config.js
+
+```
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import { defineConfig, globalIgnores } from 'eslint/config'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{js,jsx}'],
+    extends: [
+      js.configs.recommended,
+      reactHooks.configs.flat.recommended,
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        ecmaFeatures: { jsx: true },
+        sourceType: 'module',
+      },
+    },
+    rules: {
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+    },
+  },
+])
+```
+
+## index.html
+
+```
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AeroSpace</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+```
+
+## package-lock.json
+
+```
 {
   "name": "template-repo-2",
   "version": "0.0.0",
@@ -2823,15 +2946,6 @@
         "yallist": "^3.0.2"
       }
     },
-    "node_modules/lucide-react": {
-      "version": "1.16.0",
-      "resolved": "https://registry.npmjs.org/lucide-react/-/lucide-react-1.16.0.tgz",
-      "integrity": "sha512-dYwyPzb4MEKpGUmNYk3WKWPnMrHs3FKM+q94kAnJrcDIqqn1hq2xY8scaS2ovsOCM5D51ey2gaRG3PBb1vgoYQ==",
-      "license": "ISC",
-      "peerDependencies": {
-        "react": "^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0"
-      }
-    },
     "node_modules/magic-string": {
       "version": "0.30.21",
       "resolved": "https://registry.npmjs.org/magic-string/-/magic-string-0.30.21.tgz",
@@ -3602,3 +3716,290 @@
     }
   }
 }
+```
+
+## package.json
+
+```
+{
+  "name": "template-repo-2",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "motion": "^12.40.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router": "^7.15.1",
+    "tailwindcss": "^4.1.18"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "prettier": "^3.7.4",
+    "prettier-plugin-tailwindcss": "^0.7.2",
+    "vite": "^7.2.4"
+  }
+}
+```
+
+## src/components/Footer.jsx
+
+```
+export default function Footer() {
+  return (
+    <footer className='text-muted border-border/20 bg-surface/50 border-t py-6 text-center text-xs'>
+      © {new Date().getFullYear()} AeroSpace Logistics Inc. Crafted for Orbital
+      Operations.
+    </footer>
+  );
+}
+```
+
+## src/components/Header.jsx
+
+```
+import { Link } from 'react-router';
+import { useTheme } from '../context/ThemeContext';
+
+export default function Header() {
+  const { theme, toggleTheme } = useTheme();
+
+  return (
+    <header className='bg-bg/70 border-border/40 sticky top-0 z-50 flex items-center justify-between border-b px-8 py-4 backdrop-blur-md transition-colors duration-300'>
+      <Link to='/' className='text-main text-xl font-bold tracking-widest'>
+        AERO<span className='text-accent'>SPACE</span>
+      </Link>
+
+      <nav className='flex items-center gap-8'>
+        <Link
+          to='/fleet'
+          className='hover:text-accent text-sm font-medium transition-colors'
+        >
+          The Fleet
+        </Link>
+        <Link
+          to='/engineering'
+          className='hover:text-accent text-sm font-medium transition-colors'
+        >
+          Architecture
+        </Link>
+        <Link
+          to='/reserve'
+          className='bg-text-main text-bg rounded-full px-4 py-2 text-sm font-medium transition-all hover:opacity-90'
+        >
+          Book Berth
+        </Link>
+
+        <button
+          onClick={toggleTheme}
+          className='border-border hover:bg-surface cursor-pointer rounded-full border p-2 transition-colors'
+          aria-label='Toggle Layout Theme'
+        >
+          {theme === 'light' ? '🌙' : '☀️'}
+        </button>
+      </nav>
+    </header>
+  );
+}
+```
+
+## src/context/ThemeContext.jsx
+
+```
+import { createContext, useContext, useState, useEffect } from 'react';
+
+const ThemeContext = createContext();
+
+export default function ThemeProvider({ children }) {
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('aerospace-theme');
+    if (saved) return saved;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light';
+  });
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    root.setAttribute('data-theme', theme);
+    localStorage.setItem('aerospace-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () =>
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
+
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+// eslint-disable-next-line
+export const useTheme = () => useContext(ThemeContext);
+```
+
+## src/layouts/AnimationLayout.jsx
+
+```
+
+```
+
+## src/layouts/RootLayout.jsx
+
+```
+import { Outlet, useLocation } from 'react-router';
+
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+
+export default function RootLayout() {
+  const location = useLocation();
+
+  return (
+    <div className='selection:bg-accent selection:text-bg flex min-h-screen flex-col'>
+      <Header />
+
+      <main className='relative flex w-full grow flex-col'>
+        <Outlet key={location.pathname} />
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
+```
+
+## src/main.jsx
+
+```
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { createBrowserRouter, RouterProvider } from 'react-router';
+
+import './styles/index.css';
+import RootLayout from './layouts/RootLayout';
+import Home from './pages/Home';
+import Fleet from './pages/Fleet';
+import Engineering from './pages/Engineering';
+import Reserve from './pages/Reserve';
+import ThemeProvider from './context/ThemeContext';
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <RootLayout />,
+    children: [
+      { index: true, element: <Home /> },
+      { path: '/fleet', element: <Fleet /> },
+      { path: '/engineering', element: <Engineering /> },
+      { path: '/reserve', element: <Reserve /> },
+    ],
+  },
+]);
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <ThemeProvider>
+      <RouterProvider router={router} />
+    </ThemeProvider>
+  </StrictMode>,
+);
+```
+
+## src/pages/Engineering.jsx
+
+```
+export default function Engineering() {
+  return <div></div>;
+}
+```
+
+## src/pages/Fleet.jsx
+
+```
+export default function Fleet() {
+  return <div></div>;
+}
+```
+
+## src/pages/Home.jsx
+
+```
+export default function Home() {
+  return <div></div>;
+}
+```
+
+## src/pages/Reserve.jsx
+
+```
+export default function Reserve() {
+  return <div></div>;
+}
+```
+
+## src/styles/index.css
+
+```
+@import 'tailwindcss';
+
+@layer base {
+  :root {
+    /* Premium Light Mode (Stark Minimalist) */
+    --color-bg: #f8fafc; /* Slate 50 */
+    --color-surface: #ffffff;
+    --color-text-main: #0f172a; /* Slate 900 */
+    --color-text-muted: #475569; /* Slate 600 */
+    --color-accent: #0284c7; /* Cosmic Sky Blue */
+    --color-border: #e2e8f0;
+  }
+
+  [data-theme='dark'] {
+    /* Hyper-Luxury Dark Mode (Deep Space) */
+    --color-bg: #030712; /* Gray 950 (Space Black) */
+    --color-surface: #0b0f19; /* Deep Navy Hull */
+    --color-text-main: #f9fafb; /* Off-White */
+    --color-text-muted: #9ca3af; /* Muted Gray */
+    --color-accent: #38bdf8; /* Glowing Nebula Blue */
+    --color-border: #1f2937;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text-main);
+    transition:
+      background-color 0.4s ease,
+      color 0.3s ease;
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
+  }
+}
+```
+
+## vite.config.js
+
+```
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+});
+```

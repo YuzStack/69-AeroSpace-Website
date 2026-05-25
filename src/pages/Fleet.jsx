@@ -1,3 +1,3 @@
 export default function Fleet() {
-  return <div></div>;
+  return <div>FLEET</div>;
 }

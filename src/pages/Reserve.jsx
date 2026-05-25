@@ -1,3 +1,3 @@
 export default function Reserve() {
-  return <div></div>;
+  return <div>RESERVE</div>;
 }

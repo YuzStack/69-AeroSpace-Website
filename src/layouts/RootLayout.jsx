@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router';
 
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import AnimationLayout from './AnimationLayout';
 
 export default function RootLayout() {
   const location = useLocation();
@@ -11,7 +12,9 @@ export default function RootLayout() {
       <Header />
 
       <main className='relative flex w-full grow flex-col'>
-        <Outlet key={location.pathname} />
+        <AnimationLayout key={location.pathname}>
+          <Outlet />
+        </AnimationLayout>
       </main>
 
       <Footer />
