@@ -1,0 +1,33 @@
+@import 'tailwindcss';
+
+@layer base {
+  :root {
+    /* Premium Light Mode (Stark Minimalist) */
+    --color-bg: #f8fafc; /* Slate 50 */
+    --color-surface: #ffffff;
+    --color-text-main: #0f172a; /* Slate 900 */
+    --color-text-muted: #475569; /* Slate 600 */
+    --color-accent: #0284c7; /* Cosmic Sky Blue */
+    --color-border: #e2e8f0;
+  }
+
+  [data-theme='dark'] {
+    /* Hyper-Luxury Dark Mode (Deep Space) */
+    --color-bg: #030712; /* Gray 950 (Space Black) */
+    --color-surface: #0b0f19; /* Deep Navy Hull */
+    --color-text-main: #f9fafb; /* Off-White */
+    --color-text-muted: #9ca3af; /* Muted Gray */
+    --color-accent: #38bdf8; /* Glowing Nebula Blue */
+    --color-border: #1f2937;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text-main);
+    transition:
+      background-color 0.4s ease,
+      color 0.3s ease;
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
+  }
+}
