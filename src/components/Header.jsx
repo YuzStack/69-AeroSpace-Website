@@ -73,18 +73,18 @@ export default function Header() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-            className='bg-bg/95 border-border/40 absolute top-full left-0 z-40 flex w-full flex-col gap-6 border-b px-8 py-8 shadow-xl backdrop-blur-lg md:hidden'
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            className='border-border/40 absolute top-full left-0 z-40 flex w-full flex-col gap-6 border-b bg-black/60 px-8 py-8 shadow-2xl backdrop-blur-xl md:hidden'
           >
             {navLinks.map(link => (
               <Link
                 key={link.path}
                 to={link.path}
                 onClick={() => setIsOpen(false)}
-                className='text-main hover:text-accent text-lg font-medium tracking-wide'
+                className='hover:text-accent text-lg font-medium tracking-wide text-white transition-colors'
               >
                 {link.name}
               </Link>
@@ -92,7 +92,7 @@ export default function Header() {
             <Link
               to='/reserve'
               onClick={() => setIsOpen(false)}
-              className='bg-text-main text-bg rounded-full py-3 text-center text-sm font-medium transition-all'
+              className='bg-accent text-bg rounded-full py-3 text-center text-sm font-semibold text-white shadow-md transition-all hover:opacity-90'
             >
               Book Berth
             </Link>
