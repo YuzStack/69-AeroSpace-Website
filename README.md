@@ -71,6 +71,6 @@ src/
 
 To run this project locally:
 
-1. Clone the repository: `git clone git@github.com:YuzStack/69-AeroSpace-Website.git`
+1. Clone the repository: `git clone git@github.com:YuzStack/70_Caffeinate.git`
 2. Install dependencies: `npm install`
 3. Start the development server: `npm run dev`
