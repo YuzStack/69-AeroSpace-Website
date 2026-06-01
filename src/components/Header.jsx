@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router';
+import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router';
 import { Menu, X, Moon, Sun } from 'lucide-react';
 // eslint-disable-next-line
 import { motion, AnimatePresence } from 'motion/react';
@@ -8,6 +8,18 @@ import { useTheme } from '../context/ThemeContext';
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'instant',
+    });
+
+    // eslint-disable-next-line
+    setIsOpen(false);
+  }, [location.pathname]);
 
   const navLinks = [
     { name: 'The Fleet', path: '/fleet' },
